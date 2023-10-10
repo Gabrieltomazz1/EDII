@@ -1,7 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
-// Função para trocar dois elementos em um vetor
+void gerarVetorAleatorio(int arr[], int N)
+{
+    srand(time(NULL));
+    for (int i = 0; i < N; i++)
+    {
+        arr[i] = rand() % 100; // Valores aleatórios de 0 a 99
+    }
+}
+
 void trocar(int *a, int *b)
 {
     int temp = *a;
@@ -9,85 +18,85 @@ void trocar(int *a, int *b)
     *b = temp;
 }
 
-// Função de particionamento
-int particionar(int arr[], int esquerda, int direita)
+int particionar(int arr[], int esquerda, int direita, long long int *comparacoes, long long int *trocas)
 {
     int pivot = arr[esquerda];
     int i = esquerda;
 
     for (int j = esquerda + 1; j <= direita; j++)
     {
+        (*comparacoes)++;
         if (arr[j] < pivot)
         {
             i++;
             trocar(&arr[i], &arr[j]);
+            (*trocas)++;
         }
     }
 
     trocar(&arr[i], &arr[esquerda]);
+    (*trocas)++;
     return i;
 }
 
-// Função Quicksort Iterativo
-void quicksortIterativo(int arr[], int esquerda, int direita)
+void quicksortIterativo(int arr[], int esquerda, int direita, long long int *comparacoes, long long int *trocas)
 {
-    // Cria uma pilha para armazenar os limites esquerdo e direito das partições
-    int pilha[direita - esquerda + 1];
+    int *pilha = (int *)malloc(sizeof(int) * (direita - esquerda + 1));
     int topo = -1;
 
-    // Inicializa a pilha com os limites da partição inicial
     pilha[++topo] = esquerda;
     pilha[++topo] = direita;
 
-    // Enquanto a pilha não estiver vazia, continue a ordenação
     while (topo >= 0)
     {
-        // Desempilhe os limites esquerdo e direito da pilha
         direita = pilha[topo--];
         esquerda = pilha[topo--];
 
-        // Encontre o índice do pivô e coloque o pivô na posição correta
-        int indicePivo = particionar(arr, esquerda, direita);
+        int indicePivo = particionar(arr, esquerda, direita, comparacoes, trocas);
 
-        // Se houver elementos à esquerda do pivô, empilhe os limites esquerdo e direito da subpartição
         if (indicePivo - 1 > esquerda)
         {
             pilha[++topo] = esquerda;
             pilha[++topo] = indicePivo - 1;
         }
 
-        // Se houver elementos à direita do pivô, empilhe os limites esquerdo e direito da subpartição
         if (indicePivo + 1 < direita)
         {
             pilha[++topo] = indicePivo + 1;
             pilha[++topo] = direita;
         }
     }
+
+    free(pilha);
 }
 
 int main()
 {
-    int n;
+    long long int n;
+    int inicio = 0;
     printf("Digite o tamanho do vetor N: ");
-    scanf("%d", &n);
+    scanf("%lld", &n);
+    int fim = n - 1;
 
-    int *arr = malloc(n * sizeof(int));
+    int *arr = (int *)malloc(n * sizeof(int));
 
-    printf("Digite os elementos do vetor:\n");
-    for (int i = 0; i < n; i++)
-    {
-        scanf("%d", &arr[i]);
-    }
+    gerarVetorAleatorio(arr, n);
 
-    // Chamada do Quicksort Iterativo
-    quicksortIterativo(arr, 0, n - 1);
+    long long int comparacoes = 0;
+    long long int trocas = 0;
 
-    printf("Vetor ordenado:\n");
-    for (int i = 0; i < n; i++)
-    {
-        printf("%d ", arr[i]);
-    }
+    clock_t inicio_execucao = clock();
+
+    quicksortIterativo(arr, inicio, fim, &comparacoes, &trocas);
+
+    clock_t fim_execucao = clock();
+    double tempo_execucao = (double)(fim_execucao - inicio_execucao) / CLOCKS_PER_SEC;
+
     printf("\n");
+
+    printf("Comparacoes: %lld\n", comparacoes);
+    printf("Trocas: %lld\n", trocas);
+    printf("Tempo: %.4f segundos\n", tempo_execucao);
 
     free(arr);
 

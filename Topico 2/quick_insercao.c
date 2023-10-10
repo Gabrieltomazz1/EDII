@@ -69,23 +69,17 @@ int main()
 
     int *arr = malloc(n * sizeof(int));
 
-    printf("Digite os elementos do vetor:\n");
-    for (int i = 0; i < n; i++)
-    {
-        scanf("%d", &arr[i]);
-    }
-
-    printf("Digite o valor de m para a estratégia de Inserção(m): ");
+     printf("Digite o valor de m para a estratégia de Inserção(m): ");
     scanf("%d", &m);
 
     quicksortInsercao(arr, 0, n - 1, m);
 
-    printf("Vetor ordenado:\n");
-    for (int i = 0; i < n; i++)
-    {
-        printf("%d ", arr[i]);
-    }
-    printf("\n");
+    // printf("Vetor ordenado:\n");
+    // for (int i = 0; i < n; i++)
+    // {
+    //     printf("%d ", arr[i]);
+    // }
+    // printf("\n");
 
     free(arr);
 

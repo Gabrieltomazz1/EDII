@@ -2,7 +2,15 @@
 #include <stdlib.h>
 #include <time.h>
 
-// Função para trocar dois elementos em um vetor
+void gerarVetorAleatorio(int arr[], int N)
+{
+    srand(time(NULL));
+    for (int i = 0; i < N; i++)
+    {
+        arr[i] = rand() % 100; // Valores aleatórios de 0 a 99
+    }
+}
+
 void trocar(int *a, int *b)
 {
     int temp = *a;
@@ -10,23 +18,21 @@ void trocar(int *a, int *b)
     *b = temp;
 }
 
-// Função para encontrar a mediana de k elementos
-int encontrarMedianaK(int arr[], int esquerda, int direita, int k)
+int encontrarMedianaK(int arr[], int esquerda, int direita, int k, long long *comparacoes)
 {
     int tamanho = direita - esquerda + 1;
     int *valores = malloc(k * sizeof(int));
 
-    // Escolher aleatoriamente k elementos como candidatos a pivô
     for (int i = 0; i < k; i++)
     {
         valores[i] = arr[esquerda + rand() % tamanho];
     }
 
-    // Ordenar os valores
     for (int i = 0; i < k; i++)
     {
         for (int j = i + 1; j < k; j++)
         {
+            (*comparacoes)++;
             if (valores[i] > valores[j])
             {
                 trocar(&valores[i], &valores[j]);
@@ -39,16 +45,15 @@ int encontrarMedianaK(int arr[], int esquerda, int direita, int k)
     return mediana;
 }
 
-// Função de particionamento usando a mediana de k elementos como pivô
-int particionarMedianaK(int arr[], int esquerda, int direita, int k)
+int particionarMedianaK(int arr[], int esquerda, int direita, int k, long long *comparacoes, long long *trocas)
 {
-    int mediana = encontrarMedianaK(arr, esquerda, direita, k);
+    int mediana = encontrarMedianaK(arr, esquerda, direita, k, comparacoes);
 
-    // Trocar a mediana com o elemento na posição 'esquerda' para usá-lo como pivô
     for (int i = esquerda; i <= direita; i++)
     {
         if (arr[i] == mediana)
         {
+            (*trocas)++;
             trocar(&arr[esquerda], &arr[i]);
             break;
         }
@@ -57,32 +62,31 @@ int particionarMedianaK(int arr[], int esquerda, int direita, int k)
     int pivot = arr[esquerda];
     int iMenor = esquerda;
 
-    // Particionar o vetor
     for (int i = esquerda + 1; i <= direita; i++)
     {
+        (*comparacoes)++;
         if (arr[i] < pivot)
         {
+            (*trocas)++;
             iMenor++;
             trocar(&arr[iMenor], &arr[i]);
         }
     }
 
-    // Colocar o pivô na posição correta
+    (*trocas)++;
     trocar(&arr[esquerda], &arr[iMenor]);
 
     return iMenor;
 }
 
-// Função Quicksort Mediana(k)
-void quicksortMedianaK(int arr[], int esquerda, int direita, int k)
+void quicksortMedianaK(int arr[], int esquerda, int direita, int k, long long *comparacoes, long long *trocas)
 {
     if (esquerda < direita)
     {
-        int indicePivo = particionarMedianaK(arr, esquerda, direita, k);
+        int indicePivo = particionarMedianaK(arr, esquerda, direita, k, comparacoes, trocas);
 
-        // Recursivamente ordenar as duas partes
-        quicksortMedianaK(arr, esquerda, indicePivo - 1, k);
-        quicksortMedianaK(arr, indicePivo + 1, direita, k);
+        quicksortMedianaK(arr, esquerda, indicePivo - 1, k, comparacoes, trocas);
+        quicksortMedianaK(arr, indicePivo + 1, direita, k, comparacoes, trocas);
     }
 }
 
@@ -94,16 +98,26 @@ int main()
 
     int *arr = malloc(n * sizeof(int));
 
-    printf("Digite os elementos do vetor:\n");
-    for (int i = 0; i < n; i++)
-    {
-        scanf("%d", &arr[i]);
-    }
-
+    gerarVetorAleatorio(arr, n);
     printf("Digite o valor de k para a mediana: ");
     scanf("%d", &k);
 
-    quicksortMedianaK(arr, 0, n - 1, k);
+    if (k <= 0 || k > n)
+    {
+        printf("Valor de k inválido.\n");
+        free(arr);
+        return 1;
+    }
+
+    long long comparacoes = 0;
+    long long trocas = 0;
+
+    clock_t inicio_execucao = clock();
+
+    quicksortMedianaK(arr, 0, n - 1, k, &comparacoes, &trocas);
+
+    clock_t fim_execucao = clock();
+    double tempo_execucao = (double)(fim_execucao - inicio_execucao) / CLOCKS_PER_SEC;
 
     printf("Vetor ordenado:\n");
     for (int i = 0; i < n; i++)
@@ -111,6 +125,10 @@ int main()
         printf("%d ", arr[i]);
     }
     printf("\n");
+
+    printf("Comparacoes: %lld\n", comparacoes);
+    printf("Trocas: %lld\n", trocas);
+    printf("Tempo: %.4f segundos\n", tempo_execucao);
 
     free(arr);
 
