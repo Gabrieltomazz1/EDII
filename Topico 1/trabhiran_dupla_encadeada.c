@@ -2,16 +2,11 @@
 #include <stdlib.h>
 #include <time.h>
 
-// Definição da estrutura de um nó da lista duplamente encadeada
 struct Node {
     int data;
     struct Node* prev;
     struct Node* next;
 };
-
-// Variáveis globais para contar comparações e trocas
-int comparacoes = 0;
-int trocas = 0;
 
 // Função para criar um novo nó
 struct Node* newNode(int data) {
@@ -22,18 +17,17 @@ struct Node* newNode(int data) {
     return node;
 }
 
-// Função para imprimir a lista
-void printList(struct Node* head) {
-    struct Node* current = head;
-    while (current != NULL) {
-        printf("%d ", current->data);
-        current = current->next;
+// Função para liberar a memória alocada para a lista
+void freeList(struct Node* head) {
+    while (head != NULL) {
+        struct Node* current = head;
+        head = head->next;
+        free(current);
     }
-    printf("\n");
 }
 
 // Função para mesclar duas listas ordenadas em uma única lista ordenada
-struct Node* merge(struct Node* left, struct Node* right) {
+struct Node* merge(struct Node* left, struct Node* right, int* comparacoes, int* trocas) {
     if (left == NULL) {
         return right;
     }
@@ -45,33 +39,21 @@ struct Node* merge(struct Node* left, struct Node* right) {
 
     if (left->data <= right->data) {
         result = left;
-        result->next = merge(left->next, right);
+        result->next = merge(left->next, right, comparacoes, trocas);
         result->next->prev = result;
     } else {
         result = right;
-        result->next = merge(left, right->next);
+        result->next = merge(left, right->next, comparacoes, trocas);
         result->next->prev = result;
     }
 
-    // Incrementar a variável global de comparações
-    comparacoes++;
+    (*comparacoes)++;
 
     return result;
 }
 
-// Função para contar o número de nós em uma lista
-int countNodes(struct Node* head) {
-    int count = 0;
-    struct Node* current = head;
-    while (current != NULL) {
-        count++;
-        current = current->next;
-    }
-    return count;
-}
-
 // Função principal do Merge Sort para listas encadeadas
-struct Node* mergeSort(struct Node* head) {
+struct Node* mergeSort(struct Node* head, int* comparacoes, int* trocas) {
     if (head == NULL || head->next == NULL) {
         return head;
     }
@@ -91,16 +73,27 @@ struct Node* mergeSort(struct Node* head) {
     struct Node* right = middle->next;
     middle->next = NULL;
 
-    left = mergeSort(left);
-    right = mergeSort(right);
+    left = mergeSort(left, comparacoes, trocas);
+    right = mergeSort(right, comparacoes, trocas);
 
-    // Realizar a contagem de trocas aqui
-    struct Node* mergedList = merge(left, right);
-
-    // Atualizar as variáveis globais de trocas
-    trocas += countNodes(left) + countNodes(right);
+    struct Node* mergedList = merge(left, right, comparacoes, trocas);
 
     return mergedList;
+}
+
+// Função para criar uma lista com N valores aleatórios
+struct Node* createRandomList(int N) {
+    struct Node* head = newNode(rand() % 1000);
+    struct Node* current = head;
+    for (int i = 1; i < N; i++) {
+        struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+        newNode->data = rand() % 1000;
+        newNode->prev = current;
+        newNode->next = NULL;
+        current->next = newNode;
+        current = newNode;
+    }
+    return head;
 }
 
 int main() {
@@ -108,23 +101,17 @@ int main() {
     printf("Digite o tamanho da lista: ");
     scanf("%d", &N);
 
-    // Criação da lista com valores aleatórios
-    struct Node* head = newNode(rand() % 1000);
-    struct Node* current = head;
-    for (int i = 1; i < N; i++) {
-        current->next = newNode(rand() % 1000);
-        current->next->prev = current;
-        current = current->next;
-    }
-
-    // Redirecionar a saída padrão para um arquivo de saída
-    // freopen("output.txt", "w", stdout);
-
     // Registrar o tempo de início
     clock_t start_time = clock();
 
+    int comparacoes = 0;
+    int trocas = 0;
+
+    // Criação da lista com valores aleatórios
+    struct Node* head = createRandomList(N);
+
     // Chame a função Merge Sort
-    head = mergeSort(head);
+    head = mergeSort(head, &comparacoes, &trocas);
 
     // Registrar o tempo de término
     clock_t end_time = clock();
@@ -132,14 +119,14 @@ int main() {
     // Calcular o tempo de execução em segundos
     double execution_time = (double)(end_time - start_time) / CLOCKS_PER_SEC;
 
-    // Imprimir a lista ordenada
-    printList(head);
-
-    // Imprima as estatísticas de comparações, trocas e tempo de execução no arquivo
+    // Imprima as estatísticas de comparações, trocas e tempo de execução
     printf("Quantidade de comparacoes: %d\n", comparacoes);
     printf("Quantidade de trocas: %d\n", trocas);
     printf("Tempo de execucao: %f segundos\n", execution_time);
-    printf("O tamanho da lista: %d", N);
+    printf("O tamanho da lista: %d\n", N);
+
+    // Liberar a memória alocada para a lista
+    freeList(head);
 
     return 0;
 }

@@ -54,12 +54,16 @@ void quickSort(int arr[], int inicio, int fim, long long int *comparacoes, long 
     }
 }
 
-int main()
+int main(int argc, char *argv[])
 {
-    long long int n;
+    if (argc != 2)
+    {
+        printf("Uso: %s <valor_de_N>\n", argv[0]);
+        return 1;
+    }
+
+    long long int n = atoll(argv[1]);
     int inicio = 0;
-    printf("Digite o tamanho do vetor N: ");
-    scanf("%lld", &n);
     int fim = n - 1;
 
     // Declaração e alocação de memória para o vetor
@@ -68,32 +72,43 @@ int main()
     // Gerar números aleatórios para preencher o vetor
     gerarVetorAleatorio(arr, n);
 
-    long long int comparacoes = 0;
-    long long int trocas = 0;
+    for (int test = 1; test <= 5; test++)
+    {
+        printf("Teste %d\n", test);
 
-    // Medir o tempo de execução
-    clock_t inicio_execucao = clock();
+        long long int comparacoes = 0;
+        long long int trocas = 0;
 
-    // Chamada da função de ordenação Quick Sort
-    quickSort(arr, inicio, fim, &comparacoes, &trocas);
+        // Medir o tempo de execução
+        clock_t inicio_execucao = clock();
 
-    clock_t fim_execucao = clock();
-    double tempo_execucao = (double)(fim_execucao - inicio_execucao) / CLOCKS_PER_SEC;
+        // Chamada da função de ordenação Quick Sort
+        quickSort(arr, inicio, fim, &comparacoes, &trocas);
 
-    // Imprimir vetor ordenado (descomente o código abaixo se desejar)
-    // printf("Vetor ordenado:\n");
-    // for (int i = 0; i < n; i++)
-    // {
-    //     printf("%d ", arr[i]);
-    // }
-    printf("\n");
+        clock_t fim_execucao = clock();
+        double tempo_execucao = (double)(fim_execucao - inicio_execucao) / CLOCKS_PER_SEC;
 
-    printf("Comparacoes: %lld\n", comparacoes);
-    printf("Trocas: %lld\n", trocas);
-    printf("Tempo: %.4f segundos\n", tempo_execucao);
+        // Imprimir vetor ordenado (descomente o código abaixo se desejar)
+        // printf("Vetor ordenado:\n");
+        // for (int i = 0; i < n; i++)
+        // {
+        //     printf("%d ", arr[i]);
+        // }
+        printf("\n");
+
+        printf("Comparacoes: %lld\n", comparacoes);
+        printf("Trocas: %lld\n", trocas);
+        printf("Tempo: %.4f segundos\n", tempo_execucao);
+
+        // Limpeza para o próximo teste
+        if (test < 5)
+        {
+            // Regere o vetor aleatório para os próximos testes
+            gerarVetorAleatorio(arr, n);
+        }
+    }
 
     // Liberar a memória alocada para o vetor
     free(arr);
 
-    return 0;
 }

@@ -1,5 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
+
+int comparacoes = 0; // Variável para contar comparações
+int trocas = 0;      // Variável para contar trocas
 
 // Função para trocar dois elementos em um vetor
 void trocar(int *a, int *b)
@@ -7,6 +11,7 @@ void trocar(int *a, int *b)
     int temp = *a;
     *a = *b;
     *b = temp;
+    trocas++; // Incrementa o contador de trocas
 }
 
 // Função de Inserção para ordenar uma partição com tamanho <= m
@@ -20,8 +25,11 @@ void insercao(int arr[], int esquerda, int direita)
         {
             arr[j + 1] = arr[j];
             j--;
+            comparacoes++; // Incrementa o contador de comparações
+            trocas++;      // Incrementa o contador de trocas
         }
         arr[j + 1] = chave;
+        trocas++; // Incrementa o contador de trocas
     }
 }
 
@@ -38,8 +46,10 @@ int particionar(int arr[], int esquerda, int direita)
             iMenor++;
             trocar(&arr[iMenor], &arr[j]);
         }
+        comparacoes++; // Incrementa o contador de comparações
     }
     trocar(&arr[iMenor + 1], &arr[direita]);
+    trocas++; // Incrementa o contador de trocas
     return (iMenor + 1);
 }
 
@@ -59,29 +69,4 @@ void quicksortInsercao(int arr[], int esquerda, int direita, int m)
             quicksortInsercao(arr, indicePivo + 1, direita, m);
         }
     }
-}
-
-int main()
-{
-    int n, m;
-    printf("Digite o tamanho do vetor N: ");
-    scanf("%d", &n);
-
-    int *arr = malloc(n * sizeof(int));
-
-     printf("Digite o valor de m para a estratégia de Inserção(m): ");
-    scanf("%d", &m);
-
-    quicksortInsercao(arr, 0, n - 1, m);
-
-    // printf("Vetor ordenado:\n");
-    // for (int i = 0; i < n; i++)
-    // {
-    //     printf("%d ", arr[i]);
-    // }
-    // printf("\n");
-
-    free(arr);
-
-    return 0;
 }
