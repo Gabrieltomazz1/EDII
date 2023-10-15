@@ -76,12 +76,17 @@ void mergeSort(int arr[], int esq, int dir)
     }
 }
 
-int main()
+int main(int argc, char *argv[])
 {
     int N;
 
-    printf("Digite o tamanho do vetor: ");
-    scanf("%d", &N);
+    if (argc != 2)
+    {
+        printf("Uso: %s <tamanho do vetor>\n", argv[0]);
+        return 1;
+    }
+
+    N = atoi(argv[1]);
 
     int *arr = (int *)malloc(N * sizeof(int));
 
@@ -91,22 +96,27 @@ int main()
         arr[i] = rand() % 100; // Valores aleatórios de 0 a 99
     }
 
-    printf("Ordenando %d elementos...\n", N);
+    for (int test = 0; test < 5; test++)
+    {
+        // Registrar o tempo de início
+        clock_t start_time = clock();
 
-    // Registrar o tempo de início
-    clock_t start_time = clock();
+        mergeSort(arr, 0, N - 1);
 
-    mergeSort(arr, 0, N - 1);
+        // Registrar o tempo de término
+        clock_t end_time = clock();
 
-    // Registrar o tempo de término
-    clock_t end_time = clock();
+        // Calcular o tempo de execução em segundos
+        double execution_time = (double)(end_time - start_time) / CLOCKS_PER_SEC;
+        printf("Teste: %d\n", test + 1);
+        printf("Tempo de execucao: %f\n", execution_time);
+        printf("Comparacoes: %d\n", comparacoes);
+        printf("Trocas: %d\n", trocas);
 
-    // Calcular o tempo de execução em segundos
-    double execution_time = (double)(end_time - start_time) / CLOCKS_PER_SEC;
-
-    printf("Tempo de execucao: %f segundos\n", execution_time);
-    printf("Comparacoes: %d\n", comparacoes);
-    printf("Trocas: %d\n", trocas);
+        // Limpar as variáveis de contagem
+        comparacoes = 0;
+        trocas = 0;
+    }
 
     free(arr);
 

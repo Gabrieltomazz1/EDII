@@ -116,24 +116,41 @@ void mergeSort(struct Dados arr[], int esq, int dir)
     }
 }
 
-int main()
+int main(int argc, char *argv[])
 {
     int n;
-    printf("Digite o tamanho da lista: ");
-    scanf("%d", &n);
+
+    if (argc != 2)
+    {
+        printf("Uso: %s <tamanho da lista>\n", argv[0]);
+        return 1;
+    }
+
+    n = atoi(argv[1]);
+
     struct Dados *records = (struct Dados *)malloc(n * sizeof(struct Dados));
     srand(time(NULL));
-
     for (int i = 0; i < n; i++)
     {
         records[i] = gerarDadosAleatorios();
     }
+    for (int test = 0; test < 5; test++)
+    {
 
-    mergeSort(records, 0, n - 1);
+        clock_t start = clock();
+        mergeSort(records, 0, n - 1);
+        clock_t end = clock();
+        double elapsed_time = (double)(end - start) / CLOCKS_PER_SEC;
 
-    printf("\nDetalhes:\n");
-    printf("Comparacoes: %d\n", comparacoes);
-    printf("Trocas: %d\n", trocas);
+        printf("\nDetalhes (Teste %d):\n", test + 1);
+        printf("Comparacoes: %d\n", comparacoes);
+        printf("Trocas: %d\n", trocas);
+        printf("Tempo: %f segundos\n", elapsed_time);
+
+        // Limpar as variáveis de contagem
+        comparacoes = 0;
+        trocas = 0;
+    }
 
     free(records);
 
