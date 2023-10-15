@@ -70,3 +70,52 @@ void quicksortInsercao(int arr[], int esquerda, int direita, int m)
         }
     }
 }
+
+int main(int argc, char *argv[])
+{
+    if (argc != 2)
+    {
+        printf("Uso: %s <tamanho_do_vetor_N>\n", argv[0]);
+        return 1;
+    }
+
+    long long int n = atoll(argv[1]);
+    int inicio = 0;
+
+    if (n <= 0)
+    {
+        printf("Tamanho do vetor inválido.\n");
+        return 1;
+    }
+
+    int *arr = (int *)malloc(n * sizeof(int));
+
+    // Gere o vetor aleatório apenas uma vez
+    srand(time(NULL));
+    for (int i = 0; i < n; i++)
+    {
+        arr[i] = rand() % 100; // Valores aleatórios de 0 a 99
+    }
+
+    for (int test = 0; test < 5; test++)
+    {
+        comparacoes = 0; // Zere os contadores a cada teste
+        trocas = 0;
+
+        clock_t inicio_execucao = clock();
+
+        quicksortInsercao(arr, inicio, n - 1, 10); // Mude o valor de 'm' conforme necessário
+
+        clock_t fim_execucao = clock();
+        double tempo_execucao = (double)(fim_execucao - inicio_execucao) / CLOCKS_PER_SEC;
+
+        printf("Teste %d:\n", test + 1);
+        printf("Comparacoes: %d\n", comparacoes);
+        printf("Trocas: %d\n", trocas);
+        printf("Tempo: %.4f segundos\n", tempo_execucao);
+    }
+
+    free(arr);
+
+    return 0;
+}

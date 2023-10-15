@@ -88,12 +88,6 @@ int main(int argc, char *argv[])
         clock_t fim_execucao = clock();
         double tempo_execucao = (double)(fim_execucao - inicio_execucao) / CLOCKS_PER_SEC;
 
-        // Imprimir vetor ordenado (descomente o código abaixo se desejar)
-        // printf("Vetor ordenado:\n");
-        // for (int i = 0; i < n; i++)
-        // {
-        //     printf("%d ", arr[i]);
-        // }
         printf("\n");
 
         printf("Comparacoes: %lld\n", comparacoes);
@@ -110,5 +104,4 @@ int main(int argc, char *argv[])
 
     // Liberar a memória alocada para o vetor
     free(arr);
-
 }

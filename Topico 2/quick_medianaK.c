@@ -4,7 +4,6 @@
 
 void gerarVetorAleatorio(int arr[], int N)
 {
-    srand(time(NULL));
     for (int i = 0; i < N; i++)
     {
         arr[i] = rand() % 100; // Valores aleatórios de 0 a 99
@@ -90,11 +89,22 @@ void quicksortMedianaK(int arr[], int esquerda, int direita, int k, long long *c
     }
 }
 
-int main()
+int main(int argc, char *argv[])
 {
+    if (argc != 2)
+    {
+        printf("Uso: %s <tamanho_do_vetor_N>\n", argv[0]);
+        return 1;
+    }
+
     int n, k;
-    printf("Digite o tamanho do vetor N: ");
-    scanf("%d", &n);
+    n = atoi(argv[1]);
+
+    if (n <= 0)
+    {
+        printf("Tamanho do vetor inválido.\n");
+        return 1;
+    }
 
     int *arr = malloc(n * sizeof(int));
 
@@ -112,23 +122,20 @@ int main()
     long long comparacoes = 0;
     long long trocas = 0;
 
-    clock_t inicio_execucao = clock();
-
-    quicksortMedianaK(arr, 0, n - 1, k, &comparacoes, &trocas);
-
-    clock_t fim_execucao = clock();
-    double tempo_execucao = (double)(fim_execucao - inicio_execucao) / CLOCKS_PER_SEC;
-
-    printf("Vetor ordenado:\n");
-    for (int i = 0; i < n; i++)
+    for (int i = 0; i < 5; i++)
     {
-        printf("%d ", arr[i]);
-    }
-    printf("\n");
+        clock_t inicio_execucao = clock();
 
-    printf("Comparacoes: %lld\n", comparacoes);
-    printf("Trocas: %lld\n", trocas);
-    printf("Tempo: %.4f segundos\n", tempo_execucao);
+        quicksortMedianaK(arr, 0, n - 1, k, &comparacoes, &trocas);
+
+        clock_t fim_execucao = clock();
+        double tempo_execucao = (double)(fim_execucao - inicio_execucao) / CLOCKS_PER_SEC;
+
+        printf("Teste %d:\n", i + 1);
+        printf("Comparacoes: %lld\n", comparacoes);
+        printf("Trocas: %lld\n", trocas);
+        printf("Tempo: %.4f segundos\n", tempo_execucao);
+    }
 
     free(arr);
 
