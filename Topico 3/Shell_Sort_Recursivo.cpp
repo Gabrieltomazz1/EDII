@@ -2,19 +2,13 @@
 #include <stdlib.h>
 #include <time.h>
 
-typedef struct Detalhes
-{
-    int comps;  /* Quantidade de comparações */
-    int trocas; /* Quantidade de trocas */
-} detalhes;
-
-void shellSort(int *vet, int tamanho, detalhes *detalhes)
+void shellSort(int *vet, int tamanho, int *comparacoes, int *trocas)
 {
     int i, j, value;
     int gap = 1;
 
-    detalhes->trocas = 0;
-    detalhes->comps = 0;
+    *trocas = 0;
+    *comparacoes = 0;
 
     while (gap < tamanho)
     {
@@ -25,14 +19,14 @@ void shellSort(int *vet, int tamanho, detalhes *detalhes)
         gap /= 3;
         for (i = gap; i < tamanho; i++)
         {
-            detalhes->comps++;
             value = vet[i];
             j = i - gap;
             while (j >= 0 && value < vet[j])
             {
+                (*comparacoes)++;
                 vet[j + gap] = vet[j];
                 j -= gap;
-                detalhes->trocas++;
+                (*trocas)++;
             }
             vet[j + gap] = value;
         }
@@ -41,45 +35,69 @@ void shellSort(int *vet, int tamanho, detalhes *detalhes)
 
 int main(int argc, char *argv[])
 {
-    int n, i, *v;
-    detalhes detalhes;
+    int n, i;
+    double tempo_total = 0.0;
+    int comparacoes_total = 0;
+    int trocas_total = 0;
 
-    if (argc != 2)
+    if (argc != 3)
     {
-        printf("Uso: %s <tamanho do vetor>\n", argv[0]);
+        printf("Uso: %s <tamanho do vetor> <nome do arquivo de saída>\n", argv[0]);
         return 1;
     }
 
     n = atoi(argv[1]);
-
-    // Aloca e gera o vetor aleatório uma vez
-    v = (int *)malloc(n * sizeof(int));
     srand(time(NULL));
-    for (i = 0; i < n; i++)
-    {
-        v[i] = rand() % 100;
-    }
 
-    // Executa cinco testes com o mesmo vetor
+    // Abrir o arquivo de saída
+    FILE *arquivoSaida = fopen(argv[2], "w");
+
+    // Executa cinco testes
     for (int test = 0; test < 5; test++)
     {
-        printf("Teste %d - Tamanho do vetor: %d\n", test + 1, n);
+        int *v = (int *)malloc(n * sizeof(int));
+        int comparacoes = 0;
+        int trocas = 0;
+
+        for (i = 0; i < n; i++)
+        {
+            v[i] = rand() % 100;
+        }
+
+        fprintf(arquivoSaida, "Teste %d:\n", test + 1);
 
         // Inicia a contagem do tempo
         clock_t tempo_inicio = clock();
 
-        shellSort(v, n, &detalhes);
+        shellSort(v, n, &comparacoes, &trocas);
 
         // Finaliza a contagem do tempo
         clock_t tempo_fim = clock();
         double tempo_execucao = (double)(tempo_fim - tempo_inicio) / CLOCKS_PER_SEC;
 
-        // Calcula e imprime o tempo
-        printf("Tempo: %f segundos\n", tempo_execucao);
-        printf("Comparacoes: %d\n", detalhes.comps);
-        printf("Trocas: %d\n", detalhes.trocas);
+        fprintf(arquivoSaida, "Tempo: %f segundos\n", tempo_execucao);
+        fprintf(arquivoSaida, "Comparacoes: %d\n", comparacoes);
+        fprintf(arquivoSaida, "Trocas: %d\n", trocas);
+
+        // Acumular as comparações, trocas e tempo para o total
+        comparacoes_total += comparacoes;
+        trocas_total += trocas;
+        tempo_total += tempo_execucao;
+
+        free(v); // Libera o vetor alocado
     }
-    free(v);
+
+    // Calcular a média das comparações, trocas e tempo
+    int media_comparacoes = comparacoes_total / 5;
+    int media_trocas = trocas_total / 5;
+    double media_tempo = tempo_total / 5;
+
+    // Escrever os resultados da média no arquivo de saída
+    fprintf(arquivoSaida, "Média de comparações: %d\n", media_comparacoes);
+    fprintf(arquivoSaida, "Média de trocas: %d\n", media_trocas);
+    fprintf(arquivoSaida, "Média de tempo: %f segundos\n", media_tempo);
+
+    fclose(arquivoSaida);
 
     return 0;
 }

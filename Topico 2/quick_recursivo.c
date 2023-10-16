@@ -4,7 +4,6 @@
 
 void gerarVetorAleatorio(int arr[], int N)
 {
-    srand(time(NULL));
     for (int i = 0; i < N; i++)
     {
         arr[i] = rand() % 100; // Valores aleatórios de 0 a 99
@@ -34,7 +33,7 @@ int particiona(int arr[], int inicio, int fim, long long int *comparacoes, long 
 
         if (esq >= dir)
             return dir;
-
+        
         // Troca arr[esq] e arr[dir]
         int temp = arr[esq];
         arr[esq] = arr[dir];
@@ -56,52 +55,74 @@ void quickSort(int arr[], int inicio, int fim, long long int *comparacoes, long 
 
 int main(int argc, char *argv[])
 {
-    if (argc != 2)
+    if (argc != 3)
     {
-        printf("Uso: %s <valor_de_N>\n", argv[0]);
+        printf("Uso: %s <tamanho do vetor> <nome do arquivo de saída>\n", argv[0]);
         return 1;
     }
 
-    long long int n = atoll(argv[1]);
-    int inicio = 0;
-    int fim = n - 1;
+    int N = atoi(argv[1]);
+    char *nomeArquivoSaida = argv[2];
 
-    // Declaração e alocação de memória para o vetor
-    int *arr = (int *)malloc(n * sizeof(int));
-
-    // Gerar números aleatórios para preencher o vetor
-    gerarVetorAleatorio(arr, n);
-
-    for (int test = 1; test <= 5; test++)
+    FILE *arquivoSaida = fopen(nomeArquivoSaida, "w");
+    if (arquivoSaida == NULL)
     {
-        printf("Teste %d\n", test);
+        printf("Não foi possível abrir o arquivo de saída.\n");
+        return 1;
+    }
+
+    int *arr = (int *)malloc(N * sizeof(int));
+
+    srand(time(NULL));
+
+    long long int comparacoes_total = 0;
+    long long int trocas_total = 0;
+    double tempo_total = 0.0;
+
+    for (int test = 0; test < 5; test++)
+    {
+        // Gerar o vetor com valores aleatórios
+        gerarVetorAleatorio(arr, N);
 
         long long int comparacoes = 0;
         long long int trocas = 0;
 
-        // Medir o tempo de execução
-        clock_t inicio_execucao = clock();
+        // Registrar o tempo de início
+        clock_t start_time = clock();
 
         // Chamada da função de ordenação Quick Sort
-        quickSort(arr, inicio, fim, &comparacoes, &trocas);
+        quickSort(arr, 0, N - 1, &comparacoes, &trocas);
 
-        clock_t fim_execucao = clock();
-        double tempo_execucao = (double)(fim_execucao - inicio_execucao) / CLOCKS_PER_SEC;
+        // Registrar o tempo de término
+        clock_t end_time = clock();
 
-        printf("\n");
+        // Calcular o tempo de execução em segundos
+        double execution_time = (double)(end_time - start_time) / CLOCKS_PER_SEC;
 
-        printf("Comparacoes: %lld\n", comparacoes);
-        printf("Trocas: %lld\n", trocas);
-        printf("Tempo: %.4f segundos\n", tempo_execucao);
+        // Acumular as comparações, trocas e tempo para o total
+        comparacoes_total += comparacoes;
+        trocas_total += trocas;
+        tempo_total += execution_time;
 
-        // Limpeza para o próximo teste
-        if (test < 5)
-        {
-            // Regere o vetor aleatório para os próximos testes
-            gerarVetorAleatorio(arr, n);
-        }
+        // Imprimir comparações, trocas e tempo para este teste no arquivo
+        fprintf(arquivoSaida, "Teste %d:\n", test + 1);
+        fprintf(arquivoSaida, "Comparacoes: %lld\n", comparacoes);
+        fprintf(arquivoSaida, "Trocas: %lld\n", trocas);
+        fprintf(arquivoSaida, "Tempo: %f segundos\n", execution_time);
     }
 
-    // Liberar a memória alocada para o vetor
+    // Calcular a média das comparações, trocas e tempo
+    long long int media_comparacoes = comparacoes_total / 5;
+    long long int media_trocas = trocas_total / 5;
+    double media_tempo = tempo_total / 5;
+
+    // Escrever os resultados da média no arquivo de saída
+    fprintf(arquivoSaida, "Média de comparações: %lld\n", media_comparacoes);
+    fprintf(arquivoSaida, "Média de trocas: %lld\n", media_trocas);
+    fprintf(arquivoSaida, "Média de tempo: %f segundos\n", media_tempo);
+
+    fclose(arquivoSaida);
     free(arr);
+
+    return 0;
 }

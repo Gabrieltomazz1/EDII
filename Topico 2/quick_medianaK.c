@@ -91,14 +91,15 @@ void quicksortMedianaK(int arr[], int esquerda, int direita, int k, long long *c
 
 int main(int argc, char *argv[])
 {
-    if (argc != 2)
+    if (argc != 4)
     {
-        printf("Uso: %s <tamanho_do_vetor_N>\n", argv[0]);
+        printf("Uso: %s <tamanho_do_vetor_N> <valor_de_k> <nome_do_arquivo_de_saida>\n", argv[0]);
         return 1;
     }
 
     int n, k;
     n = atoi(argv[1]);
+    k = atoi(argv[2]);
 
     if (n <= 0)
     {
@@ -108,35 +109,58 @@ int main(int argc, char *argv[])
 
     int *arr = malloc(n * sizeof(int));
 
+    // Abrir o arquivo de saída
+    FILE *arquivoSaida = fopen(argv[3], "w");
+
     gerarVetorAleatorio(arr, n);
-    printf("Digite o valor de k para a mediana: ");
-    scanf("%d", &k);
 
     if (k <= 0 || k > n)
     {
         printf("Valor de k inválido.\n");
+        fclose(arquivoSaida);
         free(arr);
         return 1;
     }
 
-    long long comparacoes = 0;
-    long long trocas = 0;
+    long long comparacoes_total = 0;
+    long long trocas_total = 0;
+    double tempo_total = 0;
 
     for (int i = 0; i < 5; i++)
     {
         clock_t inicio_execucao = clock();
+
+        long long comparacoes = 0;
+        long long trocas = 0;
 
         quicksortMedianaK(arr, 0, n - 1, k, &comparacoes, &trocas);
 
         clock_t fim_execucao = clock();
         double tempo_execucao = (double)(fim_execucao - inicio_execucao) / CLOCKS_PER_SEC;
 
-        printf("Teste %d:\n", i + 1);
-        printf("Comparacoes: %lld\n", comparacoes);
-        printf("Trocas: %lld\n", trocas);
-        printf("Tempo: %.4f segundos\n", tempo_execucao);
+        // Acumular as comparações, trocas e tempo para o total
+        comparacoes_total += comparacoes;
+        trocas_total += trocas;
+        tempo_total += tempo_execucao;
+
+        // Imprimir comparações, trocas e tempo para este teste no arquivo
+        fprintf(arquivoSaida, "Teste %d:\n", i + 1);
+        fprintf(arquivoSaida, "Comp: %lld\n", comparacoes);
+        fprintf(arquivoSaida, "Trocas: %lld\n", trocas);
+        fprintf(arquivoSaida, "Tempp: %f segundos\n", tempo_execucao);
     }
 
+    // Calcular a média das comparações, trocas e tempo
+    long long int media_comparacoes = comparacoes_total / 5;
+    long long int media_trocas = trocas_total / 5;
+    double media_tempo = tempo_total / 5;
+
+    // Escrever os resultados da média no arquivo de saída
+    fprintf(arquivoSaida, "Média de Comp: %lld\n", media_comparacoes);
+    fprintf(arquivoSaida, "Média de trocas: %lld\n", media_trocas);
+    fprintf(arquivoSaida, "Média de Temp: %f segundos\n", media_tempo);
+    fprintf(arquivoSaida,"Valor de K %d",k);
+    fclose(arquivoSaida);
     free(arr);
 
     return 0;

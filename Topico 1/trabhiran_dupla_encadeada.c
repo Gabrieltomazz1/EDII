@@ -115,23 +115,34 @@ struct Node *createRandomList(int N)
     }
     return head;
 }
-
 int main(int argc, char *argv[])
 {
-    if (argc != 2)
+    if (argc != 3)
     {
-        printf("Uso: %s <tamanho_inicial_da_lista>\n", argv[0]);
+        printf("Uso: %s <tamanho_inicial_da_lista> <nome_do_arquivo_de_saida>\n", argv[0]);
         return 1;
     }
 
     int N = atoi(argv[1]);
+    char *nomeArquivoSaida = argv[2]; // Obtemos o nome do arquivo de saída
 
     srand(time(NULL));
     struct Node *head = createRandomList(N);
 
+    int total_comparacoes = 0;
+    int total_trocas = 0;
+    double total_tempo_execucao = 0.0;
+
+    FILE *arquivoSaida = fopen(nomeArquivoSaida, "w");
+    if (arquivoSaida == NULL)
+    {
+        printf("Não foi possível abrir o arquivo de saída.\n");
+        return 1;
+    }
+
     for (int test = 1; test <= 5; test++)
     {
-        printf("Teste %d - Tamanho da lista: %d\n", test, N);
+        fprintf(arquivoSaida, "Teste %d - Tamanho da lista: %d\n", test, N);
 
         clock_t start_time = clock();
         int comparacoes = 0;
@@ -143,13 +154,28 @@ int main(int argc, char *argv[])
 
         double tempo_execucao = (double)(end_time - start_time) / CLOCKS_PER_SEC;
 
-        printf("Teste %d:\n", test);
-        printf("Comparacoes: %d\n", comparacoes);
-        printf("Trocas: %d\n", trocas);
-        printf("Tempo: %.4f segundos\n", tempo_execucao);
+        fprintf(arquivoSaida, "Teste %d:\n", test);
+        fprintf(arquivoSaida, "Comparacoes: %d\n", comparacoes);
+        fprintf(arquivoSaida, "Trocas: %d\n", trocas);
+        fprintf(arquivoSaida, "Tempo: %.4f segundos\n", tempo_execucao);
+
+        total_comparacoes += comparacoes;
+        total_trocas += trocas;
+        total_tempo_execucao += tempo_execucao;
+
         freeList(head);
-        head = createRandomList(N); // Recria o vetor para o próximo teste
+        head = createRandomList(N); // Recria a lista para o próximo teste
     }
+
+    double media_comparacoes = (double)total_comparacoes / 5;
+    double media_trocas = (double)total_trocas / 5;
+    double media_tempo_execucao = total_tempo_execucao / 5;
+
+    fprintf(arquivoSaida, "Média de Comparacoes: %.2f\n", media_comparacoes);
+    fprintf(arquivoSaida, "Média de Trocas: %.2f\n", media_trocas);
+    fprintf(arquivoSaida, "Média de Tempo de Execução: %.4f segundos\n", media_tempo_execucao);
+
+    fclose(arquivoSaida);
 
     return 0;
 }

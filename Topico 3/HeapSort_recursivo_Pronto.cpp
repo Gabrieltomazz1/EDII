@@ -55,11 +55,13 @@ int main(int argc, char *argv[])
 {
 	int n, i, *v;
 	int filho = i * 2 + 1;
-	int comparacoes, trocas;
+	int comparacoes_total = 0;
+	int trocas_total = 0;
+	double tempo_total = 0.0;
 
-	if (argc != 2)
+	if (argc != 3)
 	{
-		printf("Uso: %s <tamanho do vetor>\n", argv[0]);
+		printf("Uso: %s <tamanho do vetor> <nome do arquivo de saída>\n", argv[0]);
 		return 1;
 	}
 
@@ -71,10 +73,16 @@ int main(int argc, char *argv[])
 		v[i] = rand() % 100;
 	}
 
+	// Abrir o arquivo de saída
+	FILE *arquivoSaida = fopen(argv[2], "w");
+
 	// Executa cinco testes
 	for (int test = 0; test < 5; test++)
 	{
-		printf("Teste %d!\n", test + 1);
+		int comparacoes = 0;
+		int trocas = 0;
+
+		fprintf(arquivoSaida, "Teste %d:\n", test + 1);
 
 		// Inicia a contagem do tempo
 		clock_t tempo;
@@ -82,11 +90,29 @@ int main(int argc, char *argv[])
 
 		heapSort(v, n, &comparacoes, &trocas);
 
-		printf("Tempo: %f segundos\n", (clock() - tempo) / (double)CLOCKS_PER_SEC);
-		printf("Comparacoes: %d\n", comparacoes);
-		printf("Trocas: %d\n", trocas);
+		double execution_time = (clock() - tempo) / (double)CLOCKS_PER_SEC;
+
+		fprintf(arquivoSaida, "Tempo: %f segundos\n", execution_time);
+		fprintf(arquivoSaida, "Comparacoes: %d\n", comparacoes);
+		fprintf(arquivoSaida, "Trocas: %d\n", trocas);
+
+		// Acumular as comparações, trocas e tempo para o total
+		comparacoes_total += comparacoes;
+		trocas_total += trocas;
+		tempo_total += execution_time;
 	}
 
+	// Calcular a média das comparações, trocas e tempo
+	int media_comparacoes = comparacoes_total / 5;
+	int media_trocas = trocas_total / 5;
+	double media_tempo = tempo_total / 5;
+
+	// Escrever os resultados da média no arquivo de saída
+	fprintf(arquivoSaida, "Média de comparações: %d\n", media_comparacoes);
+	fprintf(arquivoSaida, "Média de trocas: %d\n", media_trocas);
+	fprintf(arquivoSaida, "Média de tempo: %f segundos\n", media_tempo);
+
+	fclose(arquivoSaida);
 	free(v);
 
 	return 0;

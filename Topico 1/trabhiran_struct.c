@@ -2,9 +2,6 @@
 #include <stdlib.h>
 #include <time.h>
 
-int comparacoes = 0;
-int trocas = 0;
-
 struct Dados
 {
     int key;
@@ -49,7 +46,7 @@ struct Dados gerarDadosAleatorios()
     return dados;
 }
 
-void merge(struct Dados arr[], int esq, int meio, int dir)
+void merge(struct Dados arr[], int esq, int meio, int dir, int *comparacoes, int *trocas)
 {
     int i, j, k;
     int p1 = meio - esq + 1;
@@ -68,7 +65,7 @@ void merge(struct Dados arr[], int esq, int meio, int dir)
     k = esq;
     while (i < p1 && j < p2)
     {
-        comparacoes++;
+        (*comparacoes)++;
         if (L[i].key <= R[j].key)
         {
             arr[k] = L[i];
@@ -80,7 +77,7 @@ void merge(struct Dados arr[], int esq, int meio, int dir)
             j++;
         }
         k++;
-        trocas++;
+        (*trocas)++;
     }
 
     while (i < p1)
@@ -88,7 +85,7 @@ void merge(struct Dados arr[], int esq, int meio, int dir)
         arr[k] = L[i];
         i++;
         k++;
-        trocas++;
+        (*trocas)++;
     }
 
     while (j < p2)
@@ -96,23 +93,23 @@ void merge(struct Dados arr[], int esq, int meio, int dir)
         arr[k] = R[j];
         j++;
         k++;
-        trocas++;
+        (*trocas)++;
     }
 
     free(L);
     free(R);
 }
 
-void mergeSort(struct Dados arr[], int esq, int dir)
+void mergeSort(struct Dados arr[], int esq, int dir, int *comparacoes, int *trocas)
 {
     if (esq < dir)
     {
         int meio = esq + (dir - esq) / 2;
 
-        mergeSort(arr, esq, meio);
-        mergeSort(arr, meio + 1, dir);
+        mergeSort(arr, esq, meio, comparacoes, trocas);
+        mergeSort(arr, meio + 1, dir, comparacoes, trocas);
 
-        merge(arr, esq, meio, dir);
+        merge(arr, esq, meio, dir, comparacoes, trocas);
     }
 }
 
@@ -120,38 +117,57 @@ int main(int argc, char *argv[])
 {
     int n;
 
-    if (argc != 2)
+    if (argc != 3)
     {
-        printf("Uso: %s <tamanho da lista>\n", argv[0]);
+        printf("Uso: %s <tamanho da lista> <nome do arquivo de saída>\n", argv[0]);
         return 1;
     }
 
     n = atoi(argv[1]);
+    char *nomeArquivoSaida = argv[2];
 
     struct Dados *records = (struct Dados *)malloc(n * sizeof(struct Dados));
     srand(time(NULL));
-    for (int i = 0; i < n; i++)
+
+    FILE *arquivoSaida = fopen(nomeArquivoSaida, "w");
+    if (arquivoSaida == NULL)
     {
-        records[i] = gerarDadosAleatorios();
+        printf("Não foi possível abrir o arquivo de saída.\n");
+        return 1;
     }
+
+    double media_comparacoes = 0.0;
+    double media_trocas = 0.0;
+    double media_tempo = 0.0;
+
     for (int test = 0; test < 5; test++)
     {
+        int comparacoes = 0;
+        int trocas = 0;
 
         clock_t start = clock();
-        mergeSort(records, 0, n - 1);
+        mergeSort(records, 0, n - 1, &comparacoes, &trocas);
         clock_t end = clock();
         double elapsed_time = (double)(end - start) / CLOCKS_PER_SEC;
 
-        printf("\nDetalhes (Teste %d):\n", test + 1);
-        printf("Comparacoes: %d\n", comparacoes);
-        printf("Trocas: %d\n", trocas);
-        printf("Tempo: %f segundos\n", elapsed_time);
+        fprintf(arquivoSaida, "Comparacoes: %d\n", comparacoes);
+        fprintf(arquivoSaida, "Trocas: %d\n", trocas);
+        fprintf(arquivoSaida, "Tempo: %f segundos\n", elapsed_time);
 
-        // Limpar as variáveis de contagem
-        comparacoes = 0;
-        trocas = 0;
+        media_comparacoes += comparacoes;
+        media_trocas += trocas;
+        media_tempo += elapsed_time;
     }
 
+    media_comparacoes /= 5.0;
+    media_trocas /= 5.0;
+    media_tempo /= 5.0;
+
+    fprintf(arquivoSaida, "\nMédia de Comparacoes: %.2f\n", media_comparacoes);
+    fprintf(arquivoSaida, "Média de Trocas: %.2f\n", media_trocas);
+    fprintf(arquivoSaida, "Média de Tempo: %.2f segundos\n", media_tempo);
+
+    fclose(arquivoSaida);
     free(records);
 
     return 0;
